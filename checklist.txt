@@ -1,0 +1,21 @@
+1. Planning & Design
+    [] ERD with tables and relationships
+    [] Endpoint list with HTTP methods
+    [] Written plan or user stories
+
+2. Structure
+    [] Required folders present
+    [] Logical separation of concerns
+    [] Clean imports & organization
+
+3. DB Modules & relationships
+    [] At least 3 tables
+    [] At least 1 relationship (FK + relationship)
+    [] Correct field types and contraints
+
+4. Routers & Endpoints
+    [] At least 10 total Endpoints
+    [] At least 2 full CRUD Routers
+    [] Correct HTTP methods & status codes
+
+5. Authentication (Login/Logout)
