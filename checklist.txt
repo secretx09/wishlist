@@ -19,3 +19,21 @@
     [] Correct HTTP methods & status codes
 
 5. Authentication (Login/Logout)
+    [] Login Endpoint
+    [] Logout Endpoint
+    [] Password hashing & auth protection
+
+6. Functionality (All endpoints work)
+    [] No server crashes (500 errors)
+    [] Correct responses & status codes
+    [] Endpoints testable via Swagger
+
+7. Documentation (Swagger and README)
+    [] /docs page works
+    [] Endpoints tagged & described
+    [] README with setup instructions
+
+8. Code Quality and validation
+    [] Pydantic schemas used properly
+    [] Validation & typing
+    [] Clean, readable code
