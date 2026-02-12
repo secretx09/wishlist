@@ -4,6 +4,7 @@
 cd app #This is where our backend files are 
 python -m venv .venv # Create the venv
 .venv\Scripts\activate.ps1 #Activate .venv
+pip install fastapi[standard]
 pip install -r requirements.txt #Install the requirements
 ```
 
