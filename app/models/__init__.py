@@ -1,3 +1,3 @@
-from .user import User
+from .users import User
 from .wishlist import Wishlist
-from .item import Item
+from .items import Item
