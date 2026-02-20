@@ -1,35 +1,66 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-from jose import jwt
-from datetime import datetime, timedelta, timezone
-from fastapi.security import OAuth2PasswordRequestForm
 
-from app.dependencies import get_db
-from app.models.users import User
-from app.schemas.auth import Token
+from ..database import SessionLocal
+from .. import crud, schemas, database, models
+from ..auth import sessions, security
 
-SECRET_KEY = "yoursecretkey"
-ALGORITHM = "HS256"
+router = APIRouter(prefix="/login", tags=["login"])
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
 
-router = APIRouter(prefix = "/auth", tags = ["Auth"])
 
-@router.post("/login", response_model = Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == form_data.username).first()
-    if not user or not pwd_context.verify(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Incorrect credentials")
+    finally:
+        db.close()
+
+@router.post("/")
+def login(user: schemas.UserLogin, response: Response, db: Session=Depends(get_db)):
+
     
-    access_token = jwt.encode(
-        {"sub": user.username, "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
-        SECRET_KEY,
-        algorithm=ALGORITHM
+    user_from_db = db.query(models.User).filter(models.User.email == user.email).first()
+    if user_from_db:
+        hashed_password = user_from_db.hashed_password
+
+        authenticated = security.verify_password(user.plain_text_password, hashed_password)
+    else:
+        return {"message": "User not found"}
+    if not authenticated:
+        raise HTTPException(status_code=401)
+    if authenticated:
+        session_id = sessions.create_session(db, user_from_db.id)
+
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        httponly=True, 
+        max_age=3600
     )
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    response.set_cookie(
+        key="chocolate_chip",
+        value="yes please",
+        httponly=True, 
+        max_age=3600
+    )
 
-@router.post("/logout")
-def logout():
-    return {"message": "Logged out successfully"}
+    return {"message": "Loggin in successfully"}
+
+
+@router.get("/me")
+def get_current_user_info(
+    user_id: int = Depends(sessions.get_current_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email
+    }
